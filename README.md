@@ -1,8 +1,7 @@
-# CyberZ-
+# CyberZ
 This Repository includes the source code for my graduation project (CyberZ)
 You can download the source code and the documentation from here: https://drive.google.com/file/d/1hOKgYsn_8UVBHCBYCW6F8TVP7_lUfXaQ/view?usp=sharing
 
-🔒 What is CyberZ?
 CyberZ is an AI-powered web application security suite designed to protect against evolving cyber threats. It combines cutting-edge machine learning with real-time monitoring to deliver robust security for modern web applications.
 
 Core Security Features:
