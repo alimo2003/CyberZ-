@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #6200ee;
+            text-align: center;
+        }
+        .test-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #6200ee;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #5000d3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .api-status {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .online {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
+        }
+        .offline {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+            color: #c62828;
+        }
+        .loading {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #1565c0;
+        }
+        .examples {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .examples h3 {
+            margin-top: 0;
+        }
+        code {
+            background-color: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .normal {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+        }
+        .sql-injection {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+        }
+        .xss {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+        }
+        
+        /* Admin Dashboard Styles */
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard-title {
+            margin-top: 0;
+            color: #6200ee;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #6200ee;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .admin-button {
+            background-color: #6200ee;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-button:hover {
+            background-color: #5000d3;
+        }
+        
+        .admin-button.secondary {
+            background-color: #03a9f4;
+        }
+        
+        .admin-button.secondary:hover {
+            background-color: #0288d1;
+        }
+        
+        .admin-button.warning {
+            background-color: #ff5722;
+        }
+        
+        .admin-button.warning:hover {
+            background-color: #e64a19;
+        }
+        
+        .admin-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .feedback-form {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .feedback-form.visible {
+            display: block;
+        }
+        
+        .feedback-options {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .option-button {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .option-button.selected {
+            border-color: #6200ee;
+            background-color: #ede7f6;
+        }
+        
+        .option-button.normal {
+            color: #2e7d32;
+        }
+        
+        .option-button.sql-injection {
+            color: #c62828;
+        }
+        
+        .option-button.xss {
+            color: #f57f17;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6200ee;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            margin-right: 10px;
+            display: none;
+        }
+        
+        .loading-button .loading-spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .status-message.error {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+            color: #c62828;
+            display: block;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: #6200ee;
+            color: #6200ee;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <h1>Security Scanner Admin Dashboard</h1>
+    
+    <div id="apiStatus" class="api-status loading">
+        Checking API status...
+    </div>
+    
+    <div class="tab-container">
+        <div class="tabs">
+            <div class="tab active" data-tab="scanner">Test Scanner</div>
+            <div class="tab" data-tab="model">Model Management</div>
+            <div class="tab" data-tab="stats">Statistics</div>
+        </div>
+        
+        <!-- Test Scanner Tab -->
+        <div id="scanner-tab" class="tab-content active">
+            <div class="test-container">
+                <h2>Test Your Security Scanning API</h2>
+                <p>This page lets you test your security scanning API with different inputs to see how it classifies them.</p>
+        
+        <div class="examples">
+            <h3>Example Inputs to Test</h3>
+            <h4>SQL Injection Examples:</h4>
+            <ul>
+                <li><code>' OR 1=1 --</code></li>
+                <li><code>admin'; DROP TABLE users; --</code></li>
+                <li><code>105 OR 1=1</code></li>
+                <li><code>"; SELECT * FROM users WHERE name LIKE "%</code></li>
+            </ul>
+            
+            <h4>XSS Examples:</h4>
+            <ul>
+                <li><code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
+                <li><code>&lt;img src="x" onerror="alert(1)"&gt;</code></li>
+                <li><code>javascript:alert(document.cookie)</code></li>
+                <li><code>&lt;a onmouseover="alert(1)"&gt;hover me&lt;/a&gt;</code></li>
+            </ul>
+            
+            <h4>Normal Inputs:</h4>
+            <ul>
+                <li><code>Hello world</code></li>
+                <li><code>Buy groceries tomorrow</code></li>
+                <li><code>https://example.com</code></li>
+            </ul>
+        </div>
+        
+        <div class="form-group">
+            <label for="inputText">Input to Test:</label>
+            <input type="text" id="inputText" placeholder="Enter text to check for security threats...">
+        </div>
+        
+                <div class="form-group">
+                    <label for="inputSource">Source (optional):</label>
+                    <input type="text" id="inputSource" placeholder="e.g., search-query, login-form" value="test-client">
+                </div>
+                
+                <button id="scanButton" disabled>Scan</button>
+                
+                <div id="result" class="result"></div>
+                
+                <!-- Feedback section that appears after a scan -->
+                <div id="feedbackFormScanner" class="feedback-form">
+                    <h3>Provide Feedback on This Result</h3>
+                    <p>If the classification is incorrect, please select the correct category:</p>
+                    <div class="feedback-options">
+                        <div class="option-button normal" data-label="0">NORMAL</div>
+                        <div class="option-button sql-injection" data-label="1">SQL INJECTION</div>
+                        <div class="option-button xss" data-label="2">XSS</div>
+                    </div>
+                    <button id="submitFeedbackScanner" class="admin-button secondary">
+                        <div class="loading-spinner"></div>
+                        Submit Feedback
+                    </button>
+                    <div id="feedbackStatusScanner" class="status-message"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Model Management Tab -->
+        <div id="model-tab" class="tab-content">
+            <div class="dashboard-container">
+                <!-- Model Information Panel -->
+                <div class="dashboard-panel">
+                    <h3 class="dashboard-title">Model Information</h3>
+                    <div id="modelInfo">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div id="modelAccuracy" class="stat-number">--</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                            <div class="stat-box">
+                                <div id="trainedOn" class="stat-number">--</div>
+                                <div class="stat-label">Samples</div>
+                            </div>
+                        </div>
+                        <p><strong>Status:</strong> <span id="modelStatus">--</span></p>
+                        <p><strong>Last Trained:</strong> <span id="lastTrained">--</span></p>
+                    </div>
+                </div>
+                
+                <!-- Learning Dataset Panel -->
+                <div class="dashboard-panel">
+                    <h3 class="dashboard-title">Learning Dataset Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-number" id="totalSamples">0</div>
+                            <div class="stat-label">Total Samples</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="verifiedSamples">0</div>
+                            <div class="stat-label">Verified Samples</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="normalSamples">0</div>
+                            <div class="stat-label">Normal Samples</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="sqliSamples">0</div>
+                            <div class="stat-label">SQL Injection</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="xssSamples">0</div>
+                            <div class="stat-label">XSS Samples</div>
+                        </div>
+                    </div>
+                    
+                    <div class="model-status">
+                        <p><strong>Model Status:</strong> <span id="modelStatus">Idle</span></p>
+                        <p><strong>Last Trained:</strong> <span id="lastTrained">Never</span></p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="refreshLearningStats" class="admin-button">Refresh Stats</button>
+                        <button id="triggerRetraining" class="admin-button" disabled>Trigger Retraining</button>
+                    </div>
+                    <div id="retrainingStatus" class="status-message"></div>
+                </div>
+                
+
+            </div>
+            
+            <!-- Manual Feedback Form -->
+            <div class="test-container">
+                <h2>Submit Manual Feedback</h2>
+                <p>Use this form to manually submit feedback for specific inputs to help improve the model.</p>
+                
+                <div class="form-group">
+                    <label for="feedbackText">Input Text:</label>
+                    <input type="text" id="feedbackText" placeholder="Enter text to provide feedback on...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Correct Classification:</label>
+                    <div class="feedback-options">
+                        <div class="option-button normal selected" data-label="0">NORMAL</div>
+                        <div class="option-button sql-injection" data-label="1">SQL INJECTION</div>
+                        <div class="option-button xss" data-label="2">XSS</div>
+                    </div>
+                </div>
+                
+                <button id="submitManualFeedback" class="admin-button">
+                    <div class="loading-spinner"></div>
+                    Submit Feedback
+                </button>
+                
+                <div id="manualFeedbackStatus" class="status-message"></div>
+            </div>
+        </div>
+        
+        <!-- Statistics Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="dashboard-container">
+                <!-- Attack Statistics Panel -->
+                <div class="dashboard-panel">
+                    <h3 class="dashboard-title">Attack Statistics</h3>
+                    <div id="attackStats">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div id="totalRequests" class="stat-number">--</div>
+                                <div class="stat-label">Total Requests</div>
+                            </div>
+                            <div class="stat-box">
+                                <div id="totalThreats" class="stat-number">--</div>
+                                <div class="stat-label">Threats Detected</div>
+                            </div>
+                            <div class="stat-box">
+                                <div id="sqlInjections" class="stat-number">--</div>
+                                <div class="stat-label">SQL Injections</div>
+                            </div>
+                            <div class="stat-box">
+                                <div id="xssAttacks" class="stat-number">--</div>
+                                <div class="stat-label">XSS Attacks</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="refreshStats" class="admin-button">
+                            <div class="loading-spinner"></div>
+                            Refresh Stats
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recent Attacks Panel -->
+                <div class="dashboard-panel">
+                    <h3 class="dashboard-title">Recent Attacks</h3>
+                    <div id="recentAttacks">
+                        <p>Loading recent attacks...</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="refreshLogs" class="admin-button">
+                            <div class="loading-spinner"></div>
+                            Refresh Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API endpoints to try (in order)
+        const API_ENDPOINTS = [
+            'http://localhost:8080',  // Primary API endpoint
+            'http://127.0.0.1:8080',  // Alternative localhost notation
+            'http://localhost:5000',
+            'http://127.0.0.1:5000'
+        ];
+        
+        // Function to check if the API is reachable
+        async function isApiReachable(url) {
+            try {
+                const response = await fetch(`${url}/api/status`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                return response.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+        let currentApiUrl = null;
+        
+        // Global variables to store the current scan result
+        let currentScanText = "";
+        let currentScanResult = null;
+        
+        // Elements
+        const apiStatus = document.getElementById('apiStatus');
+        const inputText = document.getElementById('inputText');
+        const inputSource = document.getElementById('inputSource');
+        const scanButton = document.getElementById('scanButton');
+        const resultDiv = document.getElementById('result');
+        
+        // Tab navigation elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Elements for the model management section
+        const feedbackFormScanner = document.getElementById('feedbackFormScanner');
+        const submitFeedbackScanner = document.getElementById('submitFeedbackScanner');
+        const feedbackStatusScanner = document.getElementById('feedbackStatusScanner');
+        const optionButtonsScanner = feedbackFormScanner.querySelectorAll('.option-button');
+        
+        // Elements for manual feedback form
+        const feedbackText = document.getElementById('feedbackText');
+        const submitManualFeedback = document.getElementById('submitManualFeedback');
+        const manualFeedbackStatus = document.getElementById('manualFeedbackStatus');
+        const optionButtonsManual = document.querySelectorAll('#model-tab .feedback-options .option-button');
+        
+        // Elements for model stats
+        const refreshLearningStats = document.getElementById('refreshLearningStats');
+        const triggerRetraining = document.getElementById('triggerRetraining');
+        const retrainingStatus = document.getElementById('retrainingStatus');
+        
+        // Elements for attack stats
+        const refreshStats = document.getElementById('refreshStats');
+        const refreshLogs = document.getElementById('refreshLogs');
+        
+        // Check API status on load
+        window.addEventListener('load', function() {
+            checkApiStatus();
+            setupTabNavigation();
+            setupFeedbackForms();
+            setupModelManagement();
+            setupStatistics();
+        });
+        
+        // Scan button click event
+        scanButton.addEventListener('click', scanInput);
+        
+        // Setup tab navigation
+        function setupTabNavigation() {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show selected tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                            
+                            // Refresh stats when switching to stats tab
+                            if (tabId === 'stats') {
+                                fetchStats();
+                                fetchLogs();
+                            }
+                            
+                            // Refresh model stats when switching to model tab
+                            if (tabId === 'model') {
+                                fetchLearningStats();
+                            }
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Setup feedback forms
+        function setupFeedbackForms() {
+            // Setup scanner feedback option buttons
+            optionButtonsScanner.forEach(button => {
+                button.addEventListener('click', () => {
+                    optionButtonsScanner.forEach(b => b.classList.remove('selected'));
+                    button.classList.add('selected');
+                });
+            });
+            
+            // Setup manual feedback option buttons
+            optionButtonsManual.forEach(button => {
+                button.addEventListener('click', () => {
+                    optionButtonsManual.forEach(b => b.classList.remove('selected'));
+                    button.classList.add('selected');
+                });
+            });
+            
+            // Submit feedback from scanner
+            submitFeedbackScanner.addEventListener('click', submitScannerFeedback);
+            
+            // Submit manual feedback
+            submitManualFeedback.addEventListener('click', submitManualFeedbackHandler);
+        }
+        
+        // Setup model management
+        function setupModelManagement() {
+            refreshLearningStats.addEventListener('click', fetchLearningStats);
+            triggerRetraining.addEventListener('click', triggerModelRetraining);
+        }
+        
+        // Setup statistics tab
+        function setupStatistics() {
+            refreshStats.addEventListener('click', fetchStats);
+            refreshLogs.addEventListener('click', fetchLogs);
+        }
+        
+        // Try all API endpoints until one works
+        async function tryApiEndpoints(endpointPath = '') {
+            for (const endpoint of API_ENDPOINTS) {
+                const url = endpoint + endpointPath;
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        console.log(`Connected to API at ${url}`);
+                        return endpoint; // Return just the base URL without the path
+                    }
+                } catch (e) {
+                    console.log(`Failed to connect to ${url}:`, e.message);
+                }
+            }
+            return null;
+        }
+        
+        // Check API status
+        async function checkApiStatus() {
+            apiStatus.textContent = 'Checking API status...';
+            apiStatus.className = 'api-status loading';
+            
+            // First try the last working URL if available
+            if (currentApiUrl) {
+                try {
+                    const response = await fetch(`${currentApiUrl}/api/status`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        apiStatus.textContent = `API is online (${currentApiUrl})`;
+                        apiStatus.className = 'api-status online';
+                        scanButton.disabled = false; // Enable scan button when API is available
+                        return true;
+                    }
+                } catch (e) {
+                    console.log('Last API URL failed, trying others...', e);
+                }
+            }
+            
+            // If last URL failed or not set, try all endpoints
+            for (const endpoint of API_ENDPOINTS) {
+                try {
+                    const response = await fetch(`${endpoint}/api/status`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        currentApiUrl = endpoint;
+                        apiStatus.textContent = `API is online (${currentApiUrl})`;
+                        apiStatus.className = 'api-status online';
+                        scanButton.disabled = false; // Enable scan button when API is available
+                        
+                        // Move working URL to the top of the list
+                        const index = API_ENDPOINTS.indexOf(endpoint);
+                        if (index > 0) {
+                            API_ENDPOINTS.splice(index, 1);
+                            API_ENDPOINTS.unshift(endpoint);
+                        }
+                        
+                        return true;
+                    }
+                } catch (e) {
+                    console.log(`Failed to connect to ${endpoint}:`, e.message);
+                }
+            }
+            
+            // If we get here, no endpoints worked
+            apiStatus.textContent = 'API is offline. Please ensure the server is running on port 8080.';
+            apiStatus.className = 'api-status offline';
+            currentApiUrl = null;
+            scanButton.disabled = true; // Keep scan button disabled if API is offline
+            return false;
+        }
+        
+        // Function to fetch attack statistics
+        async function fetchStats() {
+            // Show loading
+            refreshStats.disabled = true;
+            refreshStats.classList.add('loading-button');
+            
+            try {
+                if (!currentApiUrl) {
+                    await checkApiStatus();
+                }
+                
+                if (!currentApiUrl) {
+                    throw new Error("No API endpoint available");
+                }
+                
+                const response = await fetch(`${currentApiUrl}/stats`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+                const stats = await response.json();
+                
+                // Update attack stats in UI
+                document.getElementById('totalRequests').textContent = stats.total_requests || 0;
+                document.getElementById('totalThreats').textContent = stats.total_threats || 0;
+                document.getElementById('sqlInjections').textContent = stats.sql_injection || 0;
+                document.getElementById('xssAttacks').textContent = stats.xss || 0;
+                
+                return stats;
+            } catch (e) {
+                console.error('Error fetching attack stats:', e);
+            } finally {
+                // Re-enable button
+                refreshStats.disabled = false;
+                refreshStats.classList.remove('loading-button');
+            }
+        }
+        
+        // Function to fetch attack logs
+        async function fetchLogs() {
+            // Show loading
+            refreshLogs.disabled = true;
+            refreshLogs.classList.add('loading-button');
+            
+            try {
+                if (!currentApiUrl) {
+                    await checkApiStatus();
+                }
+                
+                if (!currentApiUrl) {
+                    throw new Error("No API endpoint available");
+                }
+                
+                const response = await fetch(`${currentApiUrl}/logs?limit=10`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+                const logs = await response.json();
+                const recentAttacksDiv = document.getElementById('recentAttacks');
+                
+                if (logs.length === 0) {
+                    recentAttacksDiv.innerHTML = '<p>No attack logs found.</p>';
+                    return logs;
+                }
+                
+                // Build HTML for logs
+                let logsHtml = '<table style="width:100%; border-collapse: collapse;">';
+                logsHtml += '<tr><th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Time</th><th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Type</th><th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Input</th></tr>';
+                
+                logs.forEach(log => {
+                    const timestamp = new Date(log.timestamp).toLocaleString();
+                    const threatType = log.threat_type;
+                    // Truncate input if too long
+                    const input = log.input.length > 50 ? log.input.substring(0, 50) + '...' : log.input;
+                    
+                    let rowClass = '';
+                    if (threatType === 'SQL_INJECTION') {
+                        rowClass = 'style="background-color:#ffebee;"';
+                    } else if (threatType === 'XSS') {
+                        rowClass = 'style="background-color:#fff8e1;"';
+                    }
+                    
+                    logsHtml += `<tr ${rowClass}><td style="padding:8px; border-bottom:1px solid #ddd;">${timestamp}</td><td style="padding:8px; border-bottom:1px solid #ddd;">${threatType}</td><td style="padding:8px; border-bottom:1px solid #ddd;">${input}</td></tr>`;
+                });
+                
+                logsHtml += '</table>';
+                recentAttacksDiv.innerHTML = logsHtml;
+                
+                return logs;
+            } catch (e) {
+                console.error('Error fetching attack logs:', e);
+                document.getElementById('recentAttacks').innerHTML = `<p>Error fetching logs: ${e.message}</p>`;
+            } finally {
+                // Re-enable button
+                refreshLogs.disabled = false;
+                refreshLogs.classList.remove('loading-button');
+            }
+        }
+        
+        // Function to scan input
+        async function scanInput() {
+            const text = inputText.value.trim();
+            const source = inputSource.value.trim() || 'test-client';
+            
+            if (!text) {
+                alert("Please enter a text to scan");
+                return;
+            }
+            
+            resultDiv.style.display = 'none';
+            feedbackFormScanner.style.display = 'none';
+            scanButton.disabled = true;
+            scanButton.textContent = 'Scanning...';
+            
+            try {
+                if (!currentApiUrl) {
+                    await checkApiStatus();
+                }
+                
+                if (!currentApiUrl) {
+                    throw new Error("No API endpoint available");
+                }
+                
+                const response = await fetch(`${currentApiUrl}/api/scan`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        input: text,
+                        source: source
+                    }),
+                    credentials: 'omit'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Store the current scan result for feedback
+                currentScanText = text;
+                currentScanResult = result;
+                
+                // Display the result
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = JSON.stringify(result, null, 2);
+                
+                // Add CSS class based on the result
+                resultDiv.className = 'result';
+                if (result.threat_detected) {
+                    if (result.result === 'SQL_INJECTION') {
+                        resultDiv.classList.add('sql-injection');
+                    } else if (result.result === 'XSS') {
+                        resultDiv.classList.add('xss');
+                    }
+                } else {
+                    resultDiv.classList.add('normal');
+                }
+                
+                // Show feedback form
+                feedbackFormScanner.style.display = 'block';
+                feedbackStatusScanner.style.display = 'none';
+                feedbackStatusScanner.className = 'status-message';
+                
+                // Preselect the current result
+                optionButtonsScanner.forEach(button => {
+                    button.classList.remove('selected');
+                    if (button.getAttribute('data-label') == result.prediction) {
+                        button.classList.add('selected');
+                    }
+                });
+                
+            } catch (e) {
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = `Error: ${e.message}`;
+                resultDiv.className = 'result sql-injection';  // Use red styling for errors
+                feedbackFormScanner.style.display = 'none';
+            } finally {
+                scanButton.disabled = false;
+                scanButton.textContent = 'Scan';
+            }
+        }
+        
+        // Function to submit feedback from scanner
+        async function submitScannerFeedback() {
+            if (!currentScanText || !currentScanResult) {
+                alert("No scan result to provide feedback for");
+                return;
+            }
+            
+            // Get selected feedback option
+            let selectedLabel = null;
+            optionButtonsScanner.forEach(button => {
+                if (button.classList.contains('selected')) {
+                    selectedLabel = parseInt(button.getAttribute('data-label'));
+                }
+            });
+            
+            if (selectedLabel === null) {
+                alert("Please select a classification");
+                return;
+            }
+            
+            // Disable button and show loading
+            submitFeedbackScanner.disabled = true;
+            submitFeedbackScanner.classList.add('loading-button');
+            feedbackStatusScanner.style.display = 'none';
+            
+            try {
+                await provideFeedback(currentScanText, selectedLabel, 'test-client-feedback');
+                
+                // Show success message
+                feedbackStatusScanner.textContent = "Thank you for your feedback! This will help improve the model.";
+                feedbackStatusScanner.className = 'status-message success';
+                feedbackStatusScanner.style.display = 'block';
+                
+                // Update stats after feedback
+                fetchLearningStats();
+                
+            } catch (e) {
+                // Show error message
+                feedbackStatusScanner.textContent = `Error submitting feedback: ${e.message}`;
+                feedbackStatusScanner.className = 'status-message error';
+                feedbackStatusScanner.style.display = 'block';
+            } finally {
+                // Re-enable button
+                submitFeedbackScanner.disabled = false;
+                submitFeedbackScanner.classList.remove('loading-button');
+            }
+        }
+        
+        // Function to submit manual feedback
+        async function submitManualFeedbackHandler() {
+            const text = feedbackText.value.trim();
+            
+            if (!text) {
+                alert("Please enter text to provide feedback on");
+                return;
+            }
+            
+            // Get selected label
+            let selectedLabel = null;
+            optionButtonsManual.forEach(button => {
+                if (button.classList.contains('selected')) {
+                    selectedLabel = parseInt(button.getAttribute('data-label'));
+                }
+            });
+            
+            if (selectedLabel === null) {
+                alert("Please select a classification");
+                return;
+            }
+            
+            // Disable button and show loading
+            submitManualFeedback.disabled = true;
+            submitManualFeedback.classList.add('loading-button');
+            manualFeedbackStatus.style.display = 'none';
+            
+            try {
+                await provideFeedback(text, selectedLabel, 'manual-feedback');
+                
+                // Show success message
+                manualFeedbackStatus.textContent = "Thank you for your feedback! This will help improve the model.";
+                manualFeedbackStatus.className = 'status-message success';
+                manualFeedbackStatus.style.display = 'block';
+                
+                // Clear input field
+                feedbackText.value = '';
+                
+                // Update stats after feedback
+                fetchLearningStats();
+                
+            } catch (e) {
+                // Show error message
+                manualFeedbackStatus.textContent = `Error submitting feedback: ${e.message}`;
+                manualFeedbackStatus.className = 'status-message error';
+                manualFeedbackStatus.style.display = 'block';
+            } finally {
+                // Re-enable button
+                submitManualFeedback.disabled = false;
+                submitManualFeedback.classList.remove('loading-button');
+            }
+        }
+        
+        // Function to provide feedback to API
+        async function provideFeedback(text, correctLabel, source) {
+            if (!currentApiUrl) {
+                await checkApiStatus();
+            }
+            
+            if (!currentApiUrl) {
+                throw new Error("No API endpoint available");
+            }
+            
+            const response = await fetch(`${currentApiUrl}/feedback`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    input: text,
+                    correct_label: correctLabel,
+                    source: source
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `API returned status ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        // Function to fetch learning stats
+        async function fetchLearningStats() {
+            // Show loading
+            refreshLearningStats.disabled = true;
+            refreshLearningStats.classList.add('loading-button');
+            
+            try {
+                if (!currentApiUrl) {
+                    await checkApiStatus();
+                }
+                
+                if (!currentApiUrl) {
+                    throw new Error("No API endpoint available");
+                }
+                
+                const response = await fetch(`${currentApiUrl}/learning/stats`);
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+                const stats = await response.json();
+                
+                // Update learning stats in UI
+                document.getElementById('totalSamples').textContent = stats.total_samples || 0;
+                document.getElementById('verifiedSamples').textContent = stats.verified_samples || 0;
+                document.getElementById('normalSamples').textContent = stats.normal_samples || 0;
+                document.getElementById('sqliSamples').textContent = stats.sqli_samples || 0;
+                document.getElementById('xssSamples').textContent = stats.xss_samples || 0;
+                
+                // Update retraining status
+                const retrainingStatusText = stats.retraining_status || 'unknown';
+                document.getElementById('modelStatus').textContent = retrainingStatusText.charAt(0).toUpperCase() + retrainingStatusText.slice(1);
+                
+                // Update last trained time
+                const lastTrained = stats.last_trained ? new Date(stats.last_trained).toLocaleString() : 'Never';
+                document.getElementById('lastTrained').textContent = lastTrained;
+                
+                // Enable/disable retrain button based on verified samples
+                triggerRetraining.disabled = (stats.verified_samples || 0) < 10;
+                
+                return stats;
+            } catch (e) {
+                console.error('Error fetching learning stats:', e);
+            } finally {
+                // Re-enable button
+                refreshLearningStats.disabled = false;
+                refreshLearningStats.classList.remove('loading-button');
+            }
+        }
+        
+        // Function to trigger model retraining
+        async function triggerModelRetraining() {
+            // Show loading
+            triggerRetraining.disabled = true;
+            triggerRetraining.classList.add('loading-button');
+            retrainingStatus.style.display = 'none';
+            
+            try {
+                if (!currentApiUrl) {
+                    await checkApiStatus();
+                }
+                
+                if (!currentApiUrl) {
+                    throw new Error("No API endpoint available");
+                }
+                
+                const response = await fetch(`${currentApiUrl}/learning/retrain`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || `API returned status ${response.status}`);
+                }
+                
+                // Show success message
+                retrainingStatus.textContent = result.message || "Retraining has been scheduled!";
+                retrainingStatus.className = 'status-message success';
+                retrainingStatus.style.display = 'block';
+                
+                // Update stats to show new status
+                setTimeout(fetchLearningStats, 1000);
+                
+                return result;
+            } catch (e) {
+                // Show error message
+                retrainingStatus.textContent = `Error: ${e.message}`;
+                retrainingStatus.className = 'status-message error';
+                retrainingStatus.style.display = 'block';
+            } finally {
+                // Re-enable button
+                triggerRetraining.disabled = false;
+                triggerRetraining.classList.remove('loading-button');
+            }
+        }
+        
+
+    </script>
+</body>
+</html>

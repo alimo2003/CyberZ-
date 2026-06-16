@@ -1,0 +1,25 @@
+Query,Label,Source,Timestamp,Verified
+' and 1 in (select min(name) from sysobjects where xtype = 'U' and name > '.') --,0,test-client,2025-05-17 23:48:47,False
+"' and 1 in (select min(name) from sysobjects where xtype = 'U' and name > '.') --
+",1,admin-manual-feedback,2025-05-18 01:18:50,True
+"' AND MID(VERSION(),1,1) = '5';
+",1,admin-manual-feedback,2025-05-18 01:19:46,True
+"1 AND (SELECT * FROM Users) = 1	
+",1,admin-manual-feedback,2025-05-18 01:19:56,True
+"-1 UNION SELECT 1 INTO @,@,@
+",1,admin-manual-feedback,2025-05-18 01:20:08,True
+"-1 UNION SELECT 1 INTO @,@
+",1,admin-manual-feedback,2025-05-18 01:20:16,True
+"' UNION SELECT sum(columnname ) from tablename --
+",1,admin-manual-feedback,2025-05-18 01:20:26,True
+"-1' UNION SELECT 1,2,3--+
+",1,admin-manual-feedback,2025-05-18 01:20:38,True
+"' GROUP BY columnnames having 1=1 --
+",1,admin-manual-feedback,2025-05-18 01:20:48,True
+"1' GROUP BY 1,2,3--+
+",1,admin-manual-feedback,2025-05-18 01:20:55,True
+"1' GROUP BY 1,2,--+
+",1,admin-manual-feedback,2025-05-18 01:21:08,True
+alimo200300@gmail.com and 2 in (select min(age) from sysobjects where xtype = 'U' and name > '.') --,1,test-client,2025-05-18 23:39:19,False
+alimo200300@gmail.com OR 1=1,1,test-client,2025-05-31 11:47:18,True
+ali Mohamed,0,test-client,2025-05-31 11:48:34,False
