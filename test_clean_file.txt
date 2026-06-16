@@ -1,0 +1,7 @@
+This is a clean test file for security scanning.
+It contains no malicious content and is safe to use.
+
+You can use this file to test the scanning functionality of the security system.
+
+---
+Test File ID: SCAN-TEST-20230606-001

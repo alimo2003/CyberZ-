@@ -1,0 +1,6 @@
+flask==2.3.3
+pyodbc==4.0.39
+PyJWT==2.8.0
+python-dotenv==1.0.0
+pyotp==2.9.0
+email-validator==2.1.0.post1
